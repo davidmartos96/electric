@@ -18,7 +18,8 @@ defmodule Electric.Replication.Postgres.LogicalReplicationProducer do
     Update,
     Delete,
     Truncate,
-    Type
+    Type,
+    Message
   }
 
   alias Electric.Replication.Changes.{
@@ -107,6 +108,12 @@ defmodule Electric.Replication.Postgres.LogicalReplicationProducer do
   @impl true
   def handle_info(msg, state) do
     Logger.debug("Unexpected message #{inspect(msg)}")
+    {:noreply, [], state}
+  end
+
+  defp process_message(%Message{} = msg, state) do
+    Logger.info("Got a message: #{inspect(msg)}")
+
     {:noreply, [], state}
   end
 
