@@ -315,7 +315,7 @@ defmodule Electric.Replication.Postgres.Client do
   Returns `:ok` on success.
   """
   def start_replication(conn, publication, slot, handler) do
-    opts = 'proto_version \'1\', publication_names \'#{publication}\''
+    opts = 'proto_version \'1\', publication_names \'#{publication}\', messages'
 
     conn
     |> :epgsql.start_replication(:erlang.binary_to_list(slot), handler, [], '0/0', opts)
