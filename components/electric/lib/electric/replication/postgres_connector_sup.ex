@@ -5,6 +5,7 @@ defmodule Electric.Replication.PostgresConnectorSup do
   alias Electric.Replication.Connectors
   alias Electric.Replication.Postgres
   alias Electric.Replication.Vaxine
+  alias Electric.Postgres.CachedWal
 
   @spec start_link(Connectors.config()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(conn_config) do
@@ -38,6 +39,8 @@ defmodule Electric.Replication.PostgresConnectorSup do
         id: :postgres_producer,
         start: {Postgres.LogicalReplicationProducer, :start_link, [conn_config]}
       },
+      {CachedWal.EtsBacked,
+       subscribe_to: [postgres_producer], name: CachedWal.EtsBacked.get_name()},
       %{
         id: :vaxine_producer,
         start: {Vaxine.LogProducer, :start_link, [origin, downstream.producer_opts]}
