@@ -112,8 +112,9 @@ The Electric application is configured using environment variables. Everything t
 | `MIGRATIONS_DIR`              |                             | Directory to read the migration SQL files from (see below)                                                                                                    |
 | `MIGRATIONS_FILE_NAME_SUFFIX` | `/postgres.sql`             | Suffix that is appended to the migration name when looking for the migration file                                                                             |
 |                               |                             |                                                                                                                                                               |
-| `SATELLITE_AUTH_SIGNING_KEY`  | `""`                        | Authentication token signing/validation secret key. See below.                                                                                                |
-| `SATELLITE_AUTH_SIGNING_ISS`  | `""`                        | Cluster ID which acts as the issuer for the authentication JWT. See below.                                                                                    |
+| `SATELLITE_AUTH_MODE`         | `"jwt"`                     | Authentication mode to use to authenticate Satellite clients. See below.                                                                                      |
+| `SATELLITE_AUTH_JWT_ALG`      | `""`                        | The algorithm to use for JWT verification.                                                                                                                    |
+| `SATELLITE_AUTH_JWT_KEY`      | `""`                        | The key to use for JWT verification. Must be appropriate for the chosen signature algorithm. For RS* and ES* algorithms, the key must be in PEM format.       |
 |                               |                             |                                                                                                                                                               |
 | `GLOBAL_CLUSTER_ID`           |                             | Identifier of the cluster within the Electric cloud. When running locally, you can use any string                                                             |
 | `ELECTRIC_INSTANCE_ID`        |                             | Unique identifier of this Electric instance when running in the cluster. When running locally, you can use any string                                         |
@@ -121,34 +122,29 @@ The Electric application is configured using environment variables. Everything t
 
 **Authentication**
 
-By default, in dev mode, electric uses insecure authentication. This just
-accepts a user id as the authentication token and authorizes the connection as
-that user.
+By default, Electric uses JWT-based authentication. At a minimum, the signature algorithm and an appropriate key must be
+configured via the environment variables `SATELLITE_AUTH_JWT_ALG` and `SATELLITE_AUTH_JWT_KEY`.
 
-Token based authentication requires a signed JWT token with a `user_id` claim,
-and a valid issuer.
+You also have the option of using the `"insecure"` authentication mode in development and for testing. In this mode,
+the algorithm and key configuration options are ignored. Both unsigned and signed JWTs are accepted, no signature
+verification is performed in the latter case.
 
-To turn on token-based authentication in dev mode and when running in
-production, set the following environment variables:
+The auth token must have a `"user_id"` claim at the top level or under a namespace key if it is configured via
+`SATELLITE_AUTH_JWT_NAMESPACE`.
 
-- `SATELLITE_AUTH_SIGNING_KEY` - Some random string used as the HMAC signing
-  key. Must be at least 32 bytes long.
-
-- `SATELLITE_AUTH_SIGNING_ISS` - The JWT issuer (the `iss` field in the JWT).
-
-You can generate a valid token using these configuration values by running `mix electric.gen.token`, e.g:
+For development and testing purposes, you can generate a valid token using these configuration values by running `mix
+electric.gen.token`, e.g:
 
 ```shell
-$ export SATELLITE_AUTH_SIGNING_KEY=00000000000000000000000000000000
-$ export SATELLITE_AUTH_SIGNING_ISS=my.electric.server
-$ mix electric.gen.token my_user my_other_user
+$ export SATELLITE_AUTH_JWT_ALG=HS256
+$ export SATELLITE_AUTH_JWT_KEY=00000000000000000000000000000000
+$ mix electric.gen.token my_user_id
 ```
 
-The generated token(s) must be passed in the `token` field of the `SatAuthReq`
-protocol message.
+This token can be used with the Electric server running in either `insecure` or `jwt` mode. In the latter case, the Electric server must
+be configured with the same algorithm and key for the token to pass verification.
 
-For them to work, you must run the electric server configured with the same
-`SATELLITE_AUTH_SIGNING_KEY` and `SATELLITE_AUTH_SIGNING_ISS` set.
+See our official docs to learn about authentication in detail.
 
 ## Migrations
 
