@@ -10,7 +10,6 @@ configs:
     file: './compose/postgres/init.sql'
 
 volumes:
-  migrations_volume:
   pg_data:
   vaxine_data:
   electric_data:
@@ -47,19 +46,6 @@ services:
       - 5133:5133
     volumes:
       - electric_data:/app/data
-      - migrations_volume:/var/lib/migrations
     depends_on:
       - postgres_1
       - vaxine_1
-
-  local_api:
-    image: ${LOCAL_API_IMAGE:-electricsql/local-console:latest}
-    environment:
-      <<: *preshared-auth-variables
-      PORT: "4000"
-      MIGRATIONS_DIR: "/var/lib/migrations"
-      ELECTRIC_URI_LIST: http://electric_1:5050
-    ports:
-      - 4000:4000
-    volumes:
-      - migrations_volume:/var/lib/migrations
