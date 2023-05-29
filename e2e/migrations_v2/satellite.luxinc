@@ -36,7 +36,7 @@
 [endmacro]
 
 [macro node_await_insert_extended keys]
-    !client.insert_extended_item(db, ${keys})
+    !await client.insert_extended_item(db, ${keys})
     ?$node
 [endmacro]
 
