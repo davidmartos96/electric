@@ -1,6 +1,7 @@
 defmodule Electric.Satellite.Serialization do
   alias Electric.Postgres.SchemaRegistry
   alias Electric.Replication.Changes
+  alias Electric.Postgres.Lsn
 
   alias Electric.Replication.Changes.{
     Transaction,
@@ -19,12 +20,12 @@ defmodule Electric.Satellite.Serialization do
   """
   @spec serialize_trans(Transaction.t(), term(), relation_mapping()) ::
           {%SatOpLog{}, [Changes.relation()], relation_mapping()}
-  def serialize_trans(%Transaction{} = trans, vx_offset, known_relations) do
+  def serialize_trans(%Transaction{} = trans, offset, known_relations) do
     tm =
       trans.commit_timestamp
       |> DateTime.to_unix(:millisecond)
 
-    lsn = :erlang.term_to_binary(vx_offset)
+    lsn = Lsn.to_string(offset)
 
     tx_begin = %SatTransOp{
       op: {:begin, %SatOpBegin{commit_timestamp: tm, lsn: lsn, origin: trans.origin}}
