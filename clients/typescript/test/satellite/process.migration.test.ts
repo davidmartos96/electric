@@ -444,8 +444,11 @@ test.serial(
 
     // Fetch the shadow tag for row 1 such that delete will overwrite it
     const localEntries = await satellite._getEntries()
+    const opLogEntry = localEntries[0]
+    t.truthy(opLogEntry)
+
     const shadowEntryForRow1 = await satellite._getOplogShadowEntry(
-      localEntries[0]
+      opLogEntry
     ) // shadow entry for insert of row with id 1
     const shadowTagsRow1 = JSON.parse(shadowEntryForRow1[0].tags)
 
