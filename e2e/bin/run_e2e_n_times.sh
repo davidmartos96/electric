@@ -19,4 +19,6 @@ done
 
 TEST="custom_tests" make single_test
 
+rm -rf "$NEW_TESTS_DIR"
+
 echo "Done!"
