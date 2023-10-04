@@ -1,8 +1,7 @@
 name: E2E
 on:
   push:
-    branches:
-      - main
+
   pull_request:
     paths-ignore:
       # Root files
@@ -52,7 +51,6 @@ jobs:
         with:
           otp-version: ${{ env.OTP_VERSION }}
           elixir-version: ${{ env.ELIXIR_VERSION }}
-
       - run: |
           echo "ELECTRIC_VERSION=$(make --silent print_version_from_git)" >> $GITHUB_ENV
         working-directory: components/electric
@@ -76,7 +74,8 @@ jobs:
 
       - run: make lux
       - run: make deps pull
-      - run: make test_only
+      - run: ./bin/run_e2e_n_times.sh
+      #- run: make test_only
         id: tests
         env:
           ELECTRIC_IMAGE_NAME: electric-sql-ci/electric
