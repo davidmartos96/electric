@@ -4,12 +4,19 @@ set -e
 
 NUM_RUNS=30
 
-TEST_TO_RUN="tests/03.04_node_satellite_correctly_updates_serialization_caches.lux"
+NEW_TESTS_DIR="custom_tests"
+rm -rf "$NEW_TESTS_DIR"
+mkdir "$NEW_TESTS_DIR"
+
+cp tests/_satellite_macros.luxinc $NEW_TESTS_DIR
+cp tests/_shared.luxinc $NEW_TESTS_DIR
+cp tests/compose.yaml $NEW_TESTS_DIR
+cp tests/Makefile $NEW_TESTS_DIR
 
 for i in $(seq 1 $NUM_RUNS) ; do
-  echo "Run $i of $NUM_RUNS"
-  
-  TEST=$TEST_TO_RUN make single_test
+    cp tests/03.04_node_satellite_correctly_updates_serialization_caches.lux $NEW_TESTS_DIR/$i.lux
 done
+
+TEST="custom_tests" make single_test
 
 echo "Done!"
